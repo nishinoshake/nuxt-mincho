@@ -1,0 +1,37 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/app
+    docker:
+      - image: circleci/python:3.6-jessie-node-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+      - run: yarn install
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+      - run: sudo pip install awscli fonttools brotli
+      - run: yarn font:subset
+      - run: yarn font:woff
+      - run: yarn font:woff2
+      - run: yarn generate
+      - run: aws s3 sync ./dist/ s3://neko.noplan.cc --exact-timestamps --delete --exclude "*.html" --exclude "*.woff2" --cache-control max-age=31536000
+      - run: aws s3 sync ./dist/ s3://neko.noplan.cc --exact-timestamps --delete --exclude "*" --include "*.woff2" --cache-control max-age=31536000 --content-type font/woff2
+      - run: aws s3 sync ./dist/ s3://neko.noplan.cc --exact-timestamps --delete --exclude "*" --include "*.html" --cache-control no-store
+      - run: aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --paths "/*"
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master

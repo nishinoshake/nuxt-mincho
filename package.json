@@ -1,0 +1,24 @@
+{
+  "name": "nuxt-mincho",
+  "version": "1.0.0",
+  "description": "Nuxt.js with mincho",
+  "author": "noplan1989",
+  "scripts": {
+    "dev": "nuxt",
+    "font:subset": "node ./scripts/subset-japanese.js",
+    "font:woff": "pyftsubset ./assets/fonts/noto-serif.otf  --layout-features='' --flavor=woff --text-file=./scripts/subset.txt --output-file=./assets/fonts/noto-serif-sub.woff",
+    "font:woff2": "pyftsubset ./assets/fonts/noto-serif.otf  --layout-features='' --flavor=woff2 --text-file=./scripts/subset.txt --output-file=./assets/fonts/noto-serif-sub.woff2",
+    "font:build": "npm run font:subset && npm run font:woff && npm run font:woff2",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "cross-env": "^5.2.0",
+    "nuxt": "^2.0.0"
+  },
+  "devDependencies": {
+    "jsdom": "^13.1.0",
+    "node-sass": "^4.11.0",
+    "nodemon": "^1.11.0",
+    "sass-loader": "^7.1.0"
+  }
+}
